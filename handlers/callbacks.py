@@ -12,6 +12,7 @@ from utils.keyboards import (
     get_main_menu_keyboard,
     get_task_keyboard,
     get_delete_confirm_keyboard,
+    get_back_to_menu_keyboard,
 )
 from utils.formatters import (
     format_task_message,
@@ -35,7 +36,9 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     data = query.data
 
     # Обработка кнопок меню
-    if data.startswith("menu_"):
+    if data == "back_to_menu":
+        await handle_back_to_menu(update, context)
+    elif data.startswith("menu_"):
         await handle_menu_callback(update, context)
     # Обработка смены статуса задачи
     elif data.startswith("status_"):
@@ -48,7 +51,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await handle_confirm_delete_callback(update, context)
     # Отмена удаления
     elif data.startswith("cancel_delete_"):
-        await query.edit_message_text("✅ Удаление отменено.")
+        await query.edit_message_text("✅ Удаление отменено.",
+            reply_markup=get_back_to_menu_keyboard())
     # Отмена задачи (статус cancelled)
     elif data.startswith("cancel_"):
         await handle_cancel_task_callback(update, context)
@@ -58,6 +62,29 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     # Просмотр задачи по нажатию
     elif data.startswith("edit_"):
         await handle_edit_callback(update, context)
+
+
+# Обработка кнопки "Назад в главное меню"
+async def handle_back_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Возврат пользователя в главное меню."""
+    query = update.callback_query
+    user = update.effective_user
+
+    try:
+        await query.edit_message_text(
+            f"👋 <b>{user.first_name}</b>, выберите действие:\n\n"
+            "📋 <b>Главное меню</b>",
+            parse_mode="HTML",
+            reply_markup=get_main_menu_keyboard(),
+        )
+    except Exception:
+        # Если не удалось отредактировать — отправляем новое сообщение
+        await query.message.reply_text(
+            f"👋 <b>{user.first_name}</b>, выберите действие:\n\n"
+            "📋 <b>Главное меню</b>",
+            parse_mode="HTML",
+            reply_markup=get_main_menu_keyboard(),
+        )
 
 
 # Обработка кнопок главного меню
@@ -85,7 +112,8 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             return
         tasks = db.get_user_tasks(user.id, team["team_id"])
         msg = format_tasks_list([dict(t) for t in tasks], "📋 Мои задачи")
-        await query.edit_message_text(msg, parse_mode="HTML")
+        await query.edit_message_text(msg, parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard())
 
     elif data == "menu_alltasks":
         if not team:
@@ -93,7 +121,8 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             return
         tasks = db.get_team_tasks(team["team_id"])
         msg = format_tasks_list([dict(t) for t in tasks], f"📊 Все задачи «{team['name']}»")
-        await query.edit_message_text(msg, parse_mode="HTML")
+        await query.edit_message_text(msg, parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard())
 
     elif data == "menu_today":
         if not team:
@@ -101,7 +130,8 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             return
         tasks = db.get_tasks_today(team["team_id"])
         msg = format_tasks_list([dict(t) for t in tasks], "📅 Задачи на сегодня")
-        await query.edit_message_text(msg, parse_mode="HTML")
+        await query.edit_message_text(msg, parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard())
 
     elif data == "menu_week":
         if not team:
@@ -109,7 +139,8 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             return
         tasks = db.get_tasks_week(team["team_id"])
         msg = format_tasks_list([dict(t) for t in tasks], "📆 Задачи на неделю")
-        await query.edit_message_text(msg, parse_mode="HTML")
+        await query.edit_message_text(msg, parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard())
 
     elif data == "menu_team":
         if not team:
@@ -119,26 +150,31 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         owner = db.get_user(team["owner_id"])
         owner_name = owner["first_name"] if owner else "—"
         msg = format_team_info(dict(team), [dict(m) for m in members], owner_name)
-        await query.edit_message_text(msg, parse_mode="HTML")
+        await query.edit_message_text(msg, parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard())
 
     elif data == "menu_stats":
         await query.edit_message_text(
             "📈 Статистика: /stats\n📊 Моя статистика: /mystats",
             parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard(),
         )
 
     elif data == "menu_calendar":
         await query.edit_message_text(
-            "📅 Экспорт календаря: /calendar", parse_mode="HTML"
+            "📅 Экспорт календаря: /calendar", parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard(),
         )
 
     elif data == "menu_subscribe":
         await query.edit_message_text(
-            "💎 Информация о подписке: /subscribe", parse_mode="HTML"
+            "💎 Информация о подписке: /subscribe", parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard(),
         )
 
     elif data == "menu_help":
-        await query.edit_message_text(format_help_message(), parse_mode="HTML")
+        await query.edit_message_text(format_help_message(), parse_mode="HTML",
+            reply_markup=get_back_to_menu_keyboard())
 
     elif data == "menu_back":
         await query.edit_message_text(
@@ -249,6 +285,7 @@ async def handle_cancel_task_callback(
         f"❌ Задача #{task_id} отменена.\n\n"
         f"Посмотреть: /task {task_id}",
         parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard(),
     )
 
 
@@ -333,4 +370,5 @@ async def handle_edit_callback(
         f"<code>/edit {task_id} дедлайн: ДД.ММ.ГГГГ ЧЧ:ММ</code>\n\n"
         f"Посмотреть: /task {task_id}",
         parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard(),
     )

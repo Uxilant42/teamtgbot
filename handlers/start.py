@@ -8,7 +8,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 from database import Database
-from utils.keyboards import get_main_menu_keyboard
+from utils.keyboards import get_main_menu_keyboard, get_back_to_menu_keyboard
 from utils.formatters import format_help_message
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Отправка справки по всем командам."""
     await update.message.reply_text(
-        format_help_message(), parse_mode="HTML"
+        format_help_message(), parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard(),
     )
 
 
@@ -103,7 +104,8 @@ async def settings_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         "/timezone [зона] — сменить часовой пояс\n"
         "Пример: /timezone Europe/Moscow"
     )
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /timezone — смена часового пояса

@@ -15,6 +15,7 @@ from utils.keyboards import (
     get_members_keyboard,
     get_confirm_keyboard,
     get_task_keyboard,
+    get_back_to_menu_keyboard,
 )
 from utils.formatters import format_task_message, format_tasks_list
 from utils.validators import check_task_limit, format_limit_message, validate_deadline
@@ -319,7 +320,8 @@ async def mytasks_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     tasks = db.get_user_tasks(user.id, team["team_id"])
     msg = format_tasks_list([dict(t) for t in tasks], f"📋 Мои задачи")
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /alltasks — все задачи команды
@@ -337,7 +339,8 @@ async def alltasks_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     msg = format_tasks_list(
         [dict(t) for t in tasks], f"📊 Все задачи «{team['name']}»"
     )
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /today — задачи на сегодня
@@ -353,7 +356,8 @@ async def today_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     tasks = db.get_tasks_today(team["team_id"])
     msg = format_tasks_list([dict(t) for t in tasks], "📅 Задачи на сегодня")
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /week — задачи на неделю
@@ -369,7 +373,8 @@ async def week_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     tasks = db.get_tasks_week(team["team_id"])
     msg = format_tasks_list([dict(t) for t in tasks], "📆 Задачи на неделю")
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /task [ID] — детали задачи

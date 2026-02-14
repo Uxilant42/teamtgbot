@@ -12,6 +12,7 @@ from database import Database
 from utils.formatters import format_team_info
 from utils.validators import check_member_limit, format_limit_message
 from utils.notifications import notify_new_member
+from utils.keyboards import get_back_to_menu_keyboard
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,8 @@ async def createteam_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"Они могут присоединиться командой:\n"
         f"<code>/join {invite_code}</code>"
     )
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
     logger.info("Команда '%s' (ID=%s) создана пользователем %s", team_name, team_id, user.id)
 
 
@@ -84,7 +86,8 @@ async def team_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     owner_name = owner["first_name"] if owner else "—"
 
     msg = format_team_info(dict(team), [dict(m) for m in members], owner_name)
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /invite — генерация инвайт-кода
@@ -113,7 +116,8 @@ async def invite_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         f"Отправьте этот код коллегам.\n"
         f"Для присоединения: <code>/join {team['invite_code']}</code>"
     )
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard())
 
 
 # Обработчик команды /join — присоединение к команде
@@ -157,6 +161,7 @@ async def join_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         f"✅ Вы присоединились к команде «<b>{team['name']}</b>»!\n\n"
         f"Используйте /menu для начала работы.",
         parse_mode="HTML",
+        reply_markup=get_back_to_menu_keyboard(),
     )
 
     # Уведомляем остальных участников

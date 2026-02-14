@@ -6,6 +6,15 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
+# Кнопка "Назад в главное меню"
+def get_back_to_menu_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура с одной кнопкой 'Назад в меню'."""
+    keyboard = [
+        [InlineKeyboardButton("🔙 Главное меню", callback_data="back_to_menu")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 # Генерация главного меню
 def get_main_menu_keyboard() -> InlineKeyboardMarkup:
     """Клавиатура главного меню."""
@@ -34,7 +43,8 @@ def get_main_menu_keyboard() -> InlineKeyboardMarkup:
 
 # Генерация клавиатуры задачи с кнопками статусов
 def get_task_keyboard(
-    task_id: int, current_status: str, user_role: str | None = None
+    task_id: int, current_status: str, user_role: str | None = None,
+    add_back_button: bool = True,
 ) -> InlineKeyboardMarkup:
     """
     Клавиатура для управления задачей.
@@ -80,6 +90,12 @@ def get_task_keyboard(
             InlineKeyboardButton("❌ Отменить задачу", callback_data=f"cancel_{task_id}"),
             InlineKeyboardButton("🗑 Удалить", callback_data=f"delete_{task_id}"),
         ])
+
+    # Кнопка возврата в меню
+    if add_back_button:
+        keyboard.append(
+            [InlineKeyboardButton("🔙 Главное меню", callback_data="back_to_menu")]
+        )
 
     return InlineKeyboardMarkup(keyboard)
 
@@ -164,7 +180,7 @@ def get_subscription_keyboard() -> InlineKeyboardMarkup:
     keyboard = [
         [InlineKeyboardButton("💎 Pro — ₽299/мес", callback_data="sub_pro")],
         [InlineKeyboardButton("🏢 Enterprise", callback_data="sub_enterprise")],
-        [InlineKeyboardButton("🔙 Назад", callback_data="menu_back")],
+        [InlineKeyboardButton("🔙 Главное меню", callback_data="back_to_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -188,6 +204,10 @@ def get_tasks_list_keyboard(
         )
     if nav_row:
         keyboard.append(nav_row)
+    # Добавляем кнопку возврата в меню
+    keyboard.append(
+        [InlineKeyboardButton("🔙 Главное меню", callback_data="back_to_menu")]
+    )
     return InlineKeyboardMarkup(keyboard)
 
 
