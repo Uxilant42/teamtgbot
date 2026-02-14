@@ -1,0 +1,30 @@
+# Переменные окружения
+.env
+
+# Python
+*.pyc
+__pycache__/
+*.pyo
+
+# База данных
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Логи
+*.log
+
+# ОС
+.DS_Store
+Thumbs.db
+
+# Виртуальное окружение
+venv/
+.venv/
+env/
